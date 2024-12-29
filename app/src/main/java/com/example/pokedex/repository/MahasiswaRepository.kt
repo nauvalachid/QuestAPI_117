@@ -9,7 +9,7 @@ interface MahasiswaRepository {
     suspend fun insertMahasiswa(mahasiswa: Mahasiswa)
     suspend fun updateMahasiwa(nim: String, mahasiswa: Mahasiswa)
     suspend fun deleteMahasiswa(nim: String)
-    suspend fun getMahasiswaBynim(nim: String):Mahasiswa
+    suspend fun getMahasiswaById(nim: String):Mahasiswa
 }
 
 class NetworkMahasiswaRepository(
