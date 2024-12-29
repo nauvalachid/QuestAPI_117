@@ -26,3 +26,7 @@ class InsertViewModel(private val mhs: MahasiswaRepository): ViewModel(){
         }
     }
 }
+
+data class InsertUiState(
+    val insertUiState: InsertUiState = InsertUiEvent()
+)
