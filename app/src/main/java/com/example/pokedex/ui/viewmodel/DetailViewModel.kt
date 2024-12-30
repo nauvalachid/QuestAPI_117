@@ -6,6 +6,7 @@ import com.example.pokedex.model.Mahasiswa
 import com.example.pokedex.repository.MahasiswaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okio.IOException
 import retrofit2.HttpException
@@ -13,25 +14,31 @@ import retrofit2.HttpException
 sealed class DetailUiState{
     object Loading:DetailUiState()
     data class Success(val mahasiswa: Mahasiswa):DetailUiState()
-    object Error:DetailUiState()
+    data class Error(val message: String) : DetailUiState()
 }
 
-class DetailViewModel(private val repository: MahasiswaRepository):ViewModel() {
+class DetailViewModel(private val mhs: MahasiswaRepository):ViewModel() {
     private val _uiState = MutableStateFlow<DetailUiState>(DetailUiState.Loading)
-    val uiState: StateFlow<DetailUiState> = _uiState
+    val uiState: StateFlow<DetailUiState> = _uiState.asStateFlow()
 
     fun getMahasisawById(nim: String) {
         viewModelScope.launch {
-            _uiState.value = DetailUiState.Loading
             try {
-                val mahasiswa = repository.getMahasiswaById(nim)
+                val mahasiswa = mhs.getMahasiswaById(nim)
                 _uiState.value = DetailUiState.Success(mahasiswa)
-            } catch (e: IOException) {
-                e.printStackTrace()
-                _uiState.value = DetailUiState.Error
-            } catch (e: HttpException) {
-                e.printStackTrace()
-                _uiState.value = DetailUiState.Error
+            } catch (e: Exception) {
+                _uiState.value = DetailUiState.Error(e.localizedMessage ?: "Terjadi Kesalahan.")
+            }
+        }
+    }
+
+    fun deleteMhs(nim: String) {
+        viewModelScope.launch {
+            try {
+                mhs.deleteMahasiswa(nim)
+                _uiState.value = DetailUiState.Error("Data Mahasiswa telah dihapus.")
+            } catch (e: Exception) {
+                _uiState.value = DetailUiState.Error(e.localizedMessage ?: "Gagal menghapus data.")
             }
         }
     }

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,10 +20,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -75,33 +81,80 @@ fun DetailView(
                 Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit Mahasiswa")
             }
         },
-    ){innerPadding->
-        when (uiState){
-            is DetailUiState.Loading->{
-                Text("Loading...",Modifier.fillMaxSize())
+    ) { innerPadding ->
+        val uiState = viewModel.uiState.collectAsState().value
+        DetailBody(
+            uiState = uiState,
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize(),
+            onDeleteClick = {
+                viewModel.deleteMhs(nim)
+                navigateBack()
             }
-            is DetailUiState.Success->{
-                val mahasiswa = (uiState as DetailUiState.Success).mahasiswa
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalAlignment = Alignment.Start
-                ){
-                    ItemDetailMhs(mahasiswa = mahasiswa)
-                }
-            }
-            is DetailUiState.Error->{
-                Text(
-                    text = "Gagal memuat data",
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.error
-                )
+        )
+    }
+}
+
+@Composable
+fun DetailBody(
+    uiState: DetailUiState,
+    modifier: Modifier = Modifier,
+    onDeleteClick: () -> Unit
+) {
+    var deleteConfirmationRequired by remember { mutableStateOf(false) }
+
+    when (uiState) {
+        is DetailUiState.Loading -> OnLoading(modifier = modifier)
+        is DetailUiState.Success -> Column(
+            modifier = modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            ItemDetailMhs(mahasiswa = uiState.mahasiswa)
+            Button(
+                onClick = { deleteConfirmationRequired = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Delete")
             }
         }
+        is DetailUiState.Error -> OnError(retryAction = {}, modifier = modifier)
     }
+
+    if (deleteConfirmationRequired) {
+        DeleteConfirmationDialog(
+            onDeleteConfirm = {
+                deleteConfirmationRequired = false
+                onDeleteClick()
+            },
+            onDeleteCancel = { deleteConfirmationRequired = false }
+        )
+    }
+}
+
+@Composable
+private fun DeleteConfirmationDialog(
+    onDeleteConfirm: () -> Unit,
+    onDeleteCancel: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = { },
+        title = { Text("Delete Data") },
+        text = { Text("Apakah anda yakin ingin menghapus data?") },
+        modifier = modifier,
+        dismissButton = {
+            TextButton(onClick = onDeleteCancel) {
+                Text(text = "Cancel")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDeleteConfirm) {
+                Text(text = "Yes")
+            }
+        }
+    )
 }
 
 @Composable
