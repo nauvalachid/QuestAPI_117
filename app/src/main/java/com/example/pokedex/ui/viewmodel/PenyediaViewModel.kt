@@ -18,6 +18,16 @@ object PenyediaViewModel {
                 aplikasiMahasiswa().container.mahasiswaRepository
             )
         }
+        initializer {
+            DetailViewModel(
+                aplikasiMahasiswa().container.mahasiswaRepository
+            )
+        }
+        initializer {
+            UpdateViewModel(
+                aplikasiMahasiswa().container.mahasiswaRepository
+            )
+        }
     }
 }
 
