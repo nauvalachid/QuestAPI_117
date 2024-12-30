@@ -25,12 +25,12 @@ class NetworkMahasiswaRepository(
 
     override suspend fun deleteMahasiswa(nim: String) {
         try {
-            val response: mahasiswaApiService.deleteMahasiswa(nim)
+            val response = mahasiswaApiService.deleteMahasiswa(nim)
             if (!response.isSuccessful) {
                 throw IOException("Failed to delete mahasiswa. HTTP Status code: ${response.code()}")
             } else {
                 response.message()
-                printIn(response.message())
+                println(response.message())
             }
         } catch (e: Exception) {
             throw e
