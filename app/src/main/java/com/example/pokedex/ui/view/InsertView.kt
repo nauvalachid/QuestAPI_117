@@ -155,7 +155,7 @@ fun FormInput(
             value = insertUiEvent.angkatan,
             onValueChange = {onValueChange(insertUiEvent.copy(angkatan=it))},
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            label = { Text("Kelas")},
+            label = { Text("Angkatan")},
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
             singleLine = true
